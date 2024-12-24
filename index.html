@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        header {
+            background: #6200ea;
+            color: #fff;
+            width: 100%;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            margin: 20px;
+            max-width: 600px;
+            width: 100%;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        .todo-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .todo-item:last-child {
+            border-bottom: none;
+        }
+        .completed {
+            text-decoration: line-through;
+            color: gray;
+        }
+        button {
+            background: #6200ea;
+            color: #fff;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #5300d1;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Todo App</h1>
+    </header>
+    <div class="container">
+        <form id="todoForm">
+            <input type="text" id="todoInput" placeholder="Add a new task..." required>
+            <button type="submit">Add</button>
+        </form>
+        <div id="todoList"></div>
+    </div>
+    <script>
+        const apiBase = 'http://localhost:8000';
+
+        const todoForm = document.getElementById('todoForm');
+        const todoInput = document.getElementById('todoInput');
+        const todoList = document.getElementById('todoList');
+
+        async function fetchTodos() {
+            const response = await fetch(`${apiBase}/todos`);
+            const todos = await response.json();
+            renderTodos(todos);
+        }
+
+        function renderTodos(todos) {
+            todoList.innerHTML = '';
+            todos.forEach(todo => {
+                const todoItem = document.createElement('div');
+                todoItem.className = 'todo-item';
+                todoItem.innerHTML = `
+                    <span class="${todo.completed ? 'completed' : ''}">${todo.title}</span>
+                    <button onclick="toggleComplete('${todo.id}')">${todo.completed ? 'Incomplete' : 'Complete'}</button>
+                `;
+                todoList.appendChild(todoItem);
+            });
+        }
+
+        async function toggleComplete(id) {
+            // Logic for toggling the completion status
+        }
+
+        todoForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newTodo = { title: todoInput.value, completed: false };
+            await fetch(`${apiBase}/todos`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newTodo),
+            });
+            todoInput.value = '';
+            fetchTodos();
+        });
+
+        fetchTodos();
+    </script>
+</body>
+</html>
